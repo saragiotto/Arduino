@@ -2,10 +2,17 @@
 //timer1 will interrupt at 1Hz
 
 //storage variables
-boolean toggle = 0;
-boolean toggleTemp = 0;
-int ledPin = 8;
+boolean toggle = false;
+boolean toggleTemp = false;
 
+int ledPin = 8;
+int tempPin = 0;
+
+int measureAttemps = 5;
+int tempFactor = 9.31;
+int measureInterval = 50; //50 miliseconds
+
+static tempTimer = 300; 
 //this count will decrease every second and fire temperature function at 5 minute interval
 int tempCount = 300;
 
@@ -34,11 +41,24 @@ void setup(){
 
 }
 
+void setupPins() {
+    
+}
+
+void setupAnalogAref() {
+  //This change aRef to 1.1V and more accurate analog reads
+  analogReference(INTERNAL);
+}
+
+void setupInterruptTimer() {
+    
+}
+
 ISR(TIMER1_COMPA_vect) {//timer1 interrupt 1Hz
   tempCount --;
   if (tempCount == 0) {
-      tempCount = 300;
-      toggleTemp = 1;
+      tempCount = tempTimer;
+      toggleTemp = true;
   }
   toggleLed();
 }
@@ -55,10 +75,19 @@ void toggleLed() {
 void loop(){
   //do other things here
   if (toggleTemp) {
+    toggleTemp = false;
     temperature();
   }
 }
 
 void temperature() {
+  float tempC = 0;
     
+  for (int index = 0; index < measureAttemps; index++) {
+    int reading = analogRead(tempPin);
+    tempC = reading/tempFactor; 
+    delay(measureInterval);
+  }
+    
+  tempC = tempC/measureAttemps;
 }
