@@ -23,7 +23,6 @@ int tempCount = 300;
 File myFile;
 
 void setup(){
-  
   setupPins();
   setupInterruptTimer();
   setupAnalogAref();
@@ -87,9 +86,9 @@ ISR(TIMER1_COMPA_vect) {//timer1 interrupt 1Hz
 
 void toggleLed() {
   if (toggle){
-    digitalWrite(13,HIGH);
+    digitalWrite(ledPin,HIGH);
   } else {
-    digitalWrite(13,LOW);
+    digitalWrite(ledPin,LOW);
   }
   toggle = !toggle
 }
