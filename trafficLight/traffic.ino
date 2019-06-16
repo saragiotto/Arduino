@@ -29,6 +29,9 @@ int mainRoadTimeOpen = 3;
 int mainRoadTimeTransition = 1;
 int mainRoadTimeClose = 2;
 
+boolean initializeStatus = 0;
+int initializationTime = 5;
+
 void setup() {
   
   // Open serial communications and wait for port to open:
@@ -37,8 +40,8 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB port only
   }
   
-  timeCompare = mainRoadTimeClose;
-  redToggle = true;
+  timeCompare = initializationTime;
+  initializeStatus = true;
   
   //set pins as outputs
   pinMode(8, OUTPUT);
@@ -68,6 +71,21 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
 //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
   
   count += 1;
+
+  if (initializeStatus) {
+    yellowToggle = !yellowToggle;
+    Serial.print("Yellow toggled");
+    if (count >= timeCompare) {
+        count = 0;
+        initializeStatus = false;
+      	yellowToggle = false;
+        redToggle = true;
+        timeCompare = mainRoadTimeClose;
+    } else {
+      return;
+  	}
+  }
+
   if (count >= timeCompare) {
     count = 0;
     if (redToggle) {
@@ -93,8 +111,17 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
   }
 }
   
-void loop(){
-  //do other things here
+void loop() { 
+
+  if (initializeStatus) {
+    if (yellowToggle) {
+        digitalWrite(9, HIGH);
+    } else {
+        digitalWrite(9, LOW);
+    }
+    return;
+  }
+
   if (redToggle) {
 	digitalWrite(13, HIGH);
     digitalWrite(9, LOW);
