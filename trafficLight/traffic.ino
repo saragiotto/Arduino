@@ -32,6 +32,10 @@ int mainRoadTimeClose = 2;
 boolean initializeStatus = 0;
 int initializationTime = 5;
 
+int redOutput = 11;
+int yellowOutput = 12;
+int greenOutput = 13;
+
 void setup() {
   
   // Open serial communications and wait for port to open:
@@ -44,9 +48,9 @@ void setup() {
   initializeStatus = true;
   
   //set pins as outputs
-  pinMode(8, OUTPUT);
-  pinMode(9, OUTPUT);
-  pinMode(13, OUTPUT);
+  pinMode(redOutput, OUTPUT);
+  pinMode(yellowOutput, OUTPUT);
+  pinMode(greenOutput, OUTPUT);
 
   cli();//stop interrupts
 
@@ -115,29 +119,29 @@ void loop() {
 
   if (initializeStatus) {
     if (yellowToggle) {
-        digitalWrite(9, HIGH);
+        digitalWrite(yellowOutput, HIGH);
     } else {
-        digitalWrite(9, LOW);
+        digitalWrite(yellowOutput, LOW);
     }
     return;
   }
 
   if (redToggle) {
-	digitalWrite(13, HIGH);
-    digitalWrite(9, LOW);
-    digitalWrite(8, LOW);
+	digitalWrite(redOutput, HIGH);
+    digitalWrite(yellowOutput, LOW);
+    digitalWrite(greenOutput, LOW);
   }
   
   if (greenToggle) {
-	digitalWrite(13, LOW);
-    digitalWrite(9, LOW);
-    digitalWrite(8, HIGH);
+	digitalWrite(redOutput, LOW);
+    digitalWrite(yellowOutput, LOW);
+    digitalWrite(greenOutput, HIGH);
   }
   
   if (yellowToggle) {
-	digitalWrite(13, LOW);
-    digitalWrite(9, HIGH);
-    digitalWrite(8, LOW);
+	digitalWrite(redOutput, LOW);
+    digitalWrite(yellowOutput, HIGH);
+    digitalWrite(greenOutput, LOW);
   }
 }
 
