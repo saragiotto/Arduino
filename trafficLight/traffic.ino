@@ -20,14 +20,19 @@
 //timer2 will interrupt at 8kHz
 
 //storage variables
-boolean redToggle = 0;
-boolean yellowToggle = 0;
-boolean greenToggle = 0;
+boolean mainRoadGreenToggle = 0;
+boolean secondRoadGreenToggle = 0;
+boolean mainRoadYellowToggle = 0;
+boolean secondRoadYellowToggle = 0;
+boolean mainRoadRedToggle = 0;
+boolean secondRoadRedToggle = 0;
+boolean mainRoadWillOpen = 0;
 int count = 0;
 int timeCompare = 5;
 int mainRoadTimeOpen = 3;
 int mainRoadTimeTransition = 1;
 int mainRoadTimeClose = 2;
+int bothRoadTimeClose = 2;
 
 boolean initializeStatus = 0;
 int initializationTime = 5;
@@ -81,14 +86,17 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
   count += 1;
 
   if (initializeStatus) {
-    yellowToggle = !yellowToggle;
+    mainRoadYellowToggle = !mainRoadYellowToggle;
+    secondRoadYellowToggle = !secondRoadYellowToggle;
     Serial.print("Yellow toggled");
     if (count >= timeCompare) {
         count = 0;
         initializeStatus = false;
-      	yellowToggle = false;
-        redToggle = true;
-        timeCompare = mainRoadTimeClose;
+      	mainRoadYellowToggle = false;
+      	secondRoadYellowToggle = false;
+        mainRoadRedToggle = true;
+        secondRoadRedToggle = true;
+        timeCompare = bothRoadTimeClose;
     } else {
       return;
   	}
@@ -96,24 +104,46 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
 
   if (count >= timeCompare) {
     count = 0;
-    if (redToggle) {
-      redToggle = false;
-      greenToggle = true;
-      timeCompare = mainRoadTimeOpen;
-      return;
+    if (mainRoadRedToggle && secondRoadRedToggle) {
+      if (mainRoadWillOpen) {
+        mainRoadWillOpen = false;
+        mainRoadGreenToggle = true;
+        mainRoadRedToggle = false;
+        timeCompare = mainRoadTimeOpen;
+        return;
+      } else {
+        mainRoadWillOpen = true;
+        secondRoadGreenToggle = true;
+        secondRoadRedToggle = false;
+        timeCompare = mainRoadTimeClose;
+        return;
+      }
     }
-    
-    if (greenToggle) {
-      greenToggle = false;
-      yellowToggle = true;
+
+    if (mainRoadGreenToggle) {
+      mainRoadYellowToggle = true;
+      mainRoadGreenToggle = false;
       timeCompare = mainRoadTimeTransition;
       return;
     }
-    
-    if (yellowToggle) {
-      yellowToggle = false;
-      redToggle = true;
-      timeCompare = mainRoadTimeClose;
+
+    if (mainRoadYellowToggle) {
+      mainRoadRedToggle = true;
+      mainRoadYellowToggle = false;
+      timeCompare = bothRoadTimeClose;
+    } 
+   
+    if (secondRoadGreenToggle) {
+      secondRoadGreenToggle = false;
+      secondRoadYellowToggle = true;
+      timeCompare = mainRoadTimeTransition;
+      return;
+    }
+
+    if (secondRoadYellowToggle) {
+      secondRoadRedToggle = true;
+      secondRoadYellowToggle = false;
+      timeCompare = bothRoadTimeClose;
       return;
     }
   }
@@ -122,7 +152,7 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
 void loop() { 
 
   if (initializeStatus) {
-    if (yellowToggle) {
+    if (mainRoadYellowToggle) {
       digitalWrite(yellowOutputMainRoad, HIGH);
       digitalWrite(yellowOutputSecondRoad, HIGH);
     } else {
@@ -132,30 +162,40 @@ void loop() {
     return;
   }
 
-  if (redToggle) {
+  if (mainRoadRedToggle) {
 	digitalWrite(redOutputMainRoad, HIGH);
     digitalWrite(yellowOutputMainRoad, LOW);
     digitalWrite(greenOutputMainRoad, LOW);
-    
-    digitalWrite(redOutputSecondRoad, LOW);
-    digitalWrite(yellowOutputSecondRoad, LOW);
-    digitalWrite(greenOutputSecondRoad, HIGH);
   }
-  
-  if (greenToggle) {
-	digitalWrite(redOutputMainRoad, LOW);
-    digitalWrite(yellowOutputMainRoad, LOW);
-    digitalWrite(greenOutputMainRoad, HIGH);
-    
+
+  if (secondRoadRedToggle) {
     digitalWrite(redOutputSecondRoad, HIGH);
     digitalWrite(yellowOutputSecondRoad, LOW);
     digitalWrite(greenOutputSecondRoad, LOW);
   }
   
-  if (yellowToggle) {
+  if (mainRoadYellowToggle) {
 	digitalWrite(redOutputMainRoad, LOW);
     digitalWrite(yellowOutputMainRoad, HIGH);
     digitalWrite(greenOutputMainRoad, LOW);
+  }
+
+  if (secondRoadYellowToggle) {
+    digitalWrite(redOutputSecondRoad, LOW);
+    digitalWrite(yellowOutputSecondRoad, HIGH);
+    digitalWrite(greenOutputSecondRoad, LOW);
+  }
+
+  if (mainRoadGreenToggle) {
+	digitalWrite(redOutputMainRoad, LOW);
+    digitalWrite(yellowOutputMainRoad, LOW);
+    digitalWrite(greenOutputMainRoad, HIGH);
+  }
+
+  if (secondRoadGreenToggle) {
+    digitalWrite(redOutputSecondRoad, LOW);
+    digitalWrite(yellowOutputSecondRoad, LOW);
+    digitalWrite(greenOutputSecondRoad, HIGH);
   }
 }
 
