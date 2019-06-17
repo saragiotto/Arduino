@@ -32,9 +32,13 @@ int mainRoadTimeClose = 2;
 boolean initializeStatus = 0;
 int initializationTime = 5;
 
-int redOutput = 11;
-int yellowOutput = 12;
-int greenOutput = 13;
+int redOutputMainRoad = 11;
+int yellowOutputMainRoad = 12;
+int greenOutputMainRoad = 13;
+
+int redOutputSecondRoad = 8;
+int yellowOutputSecondRoad = 9;
+int greenOutputSecondRoad = 10;
 
 void setup() {
   
@@ -48,9 +52,9 @@ void setup() {
   initializeStatus = true;
   
   //set pins as outputs
-  pinMode(redOutput, OUTPUT);
-  pinMode(yellowOutput, OUTPUT);
-  pinMode(greenOutput, OUTPUT);
+  pinMode(redOutputMainRoad, OUTPUT);
+  pinMode(yellowOutputMainRoad, OUTPUT);
+  pinMode(greenOutputMainRoad, OUTPUT);
 
   cli();//stop interrupts
 
@@ -119,29 +123,39 @@ void loop() {
 
   if (initializeStatus) {
     if (yellowToggle) {
-        digitalWrite(yellowOutput, HIGH);
+      digitalWrite(yellowOutputMainRoad, HIGH);
+      digitalWrite(yellowOutputSecondRoad, HIGH);
     } else {
-        digitalWrite(yellowOutput, LOW);
+      digitalWrite(yellowOutputMainRoad, LOW);
+      digitalWrite(yellowOutputSecondRoad, LOW);
     }
     return;
   }
 
   if (redToggle) {
-	digitalWrite(redOutput, HIGH);
-    digitalWrite(yellowOutput, LOW);
-    digitalWrite(greenOutput, LOW);
+	digitalWrite(redOutputMainRoad, HIGH);
+    digitalWrite(yellowOutputMainRoad, LOW);
+    digitalWrite(greenOutputMainRoad, LOW);
+    
+    digitalWrite(redOutputSecondRoad, LOW);
+    digitalWrite(yellowOutputSecondRoad, LOW);
+    digitalWrite(greenOutputSecondRoad, HIGH);
   }
   
   if (greenToggle) {
-	digitalWrite(redOutput, LOW);
-    digitalWrite(yellowOutput, LOW);
-    digitalWrite(greenOutput, HIGH);
+	digitalWrite(redOutputMainRoad, LOW);
+    digitalWrite(yellowOutputMainRoad, LOW);
+    digitalWrite(greenOutputMainRoad, HIGH);
+    
+    digitalWrite(redOutputSecondRoad, HIGH);
+    digitalWrite(yellowOutputSecondRoad, LOW);
+    digitalWrite(greenOutputSecondRoad, LOW);
   }
   
   if (yellowToggle) {
-	digitalWrite(redOutput, LOW);
-    digitalWrite(yellowOutput, HIGH);
-    digitalWrite(greenOutput, LOW);
+	digitalWrite(redOutputMainRoad, LOW);
+    digitalWrite(yellowOutputMainRoad, HIGH);
+    digitalWrite(greenOutputMainRoad, LOW);
   }
 }
 
