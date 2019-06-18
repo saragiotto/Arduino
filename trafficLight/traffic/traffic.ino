@@ -29,10 +29,10 @@ boolean secondRoadRedToggle = 0;
 boolean mainRoadWillOpen = 0;
 int count = 0;
 int timeCompare = 5;
-int mainRoadTimeOpen = 3;
+int mainRoadTimeOpen = 12;
 int mainRoadTimeTransition = 1;
-int mainRoadTimeClose = 2;
-int bothRoadTimeClose = 2;
+int mainRoadTimeClose = 4;
+int bothRoadTimeClose = 1;
 
 boolean initializeStatus = 0;
 int initializationTime = 5;
@@ -60,6 +60,9 @@ void setup() {
   pinMode(redOutputMainRoad, OUTPUT);
   pinMode(yellowOutputMainRoad, OUTPUT);
   pinMode(greenOutputMainRoad, OUTPUT);
+  pinMode(redOutputSecondRoad, OUTPUT);
+  pinMode(yellowOutputSecondRoad, OUTPUT);
+  pinMode(greenOutputSecondRoad, OUTPUT);
 
   cli();//stop interrupts
 
@@ -198,4 +201,3 @@ void loop() {
     digitalWrite(greenOutputSecondRoad, HIGH);
   }
 }
-
