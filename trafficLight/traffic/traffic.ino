@@ -1,24 +1,23 @@
-//timer interrupts
-//by Amanda Ghassaei
-//June 2012
-//https://www.instructables.com/id/Arduino-Timer-Interrupts/
-
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
-*/
-
-//timer setup for timer0, timer1, and timer2.
-//For arduino uno or any board with ATMEL 328/168.. diecimila, duemilanove, lilypad, nano, mini...
-
-//this code will enable all three arduino timer interrupts.
-//timer0 will interrupt at 2kHz
-//timer1 will interrupt at 1Hz
-//timer2 will interrupt at 8kHz
-
+// Traffic light contro
+//
+//
+//  Attribute that control all state of the system
+//
+// +--------+---------------------------------------+
+// + State  + Status                                + 
+// +--------+---------------------------------------+
+// +  00    + Initialize Status                     + 
+// +  01    + Main Road Traffic Open                + 
+// +  02    + Second Road Traffic Open              + 
+// +  03    + Main Road Traffic Attention           + 
+// +  04    + Second Road Traffic Attention         + 
+// +  05    + Traffic Closed - Main Road Will Open  + 
+// +  06    + Traffic Closed - Second Road Will Open  + 
+// +  07    + Traffic Attention Both Roads          + 
+// +        +                                       +
+// +--------+---------------------------------------+
+//
+//
 //storage variables
 boolean mainRoadGreenToggle = 0;
 boolean secondRoadGreenToggle = 0;
@@ -27,6 +26,10 @@ boolean secondRoadYellowToggle = 0;
 boolean mainRoadRedToggle = 0;
 boolean secondRoadRedToggle = 0;
 boolean mainRoadWillOpen = 0;
+boolean initializeStatus = 0;
+
+int trafficLightStatus = 0;
+
 int count = 0;
 int timeCompare = 5;
 int mainRoadTimeOpen = 12;
@@ -34,7 +37,6 @@ int mainRoadTimeTransition = 1;
 int mainRoadTimeClose = 4;
 int bothRoadTimeClose = 1;
 
-boolean initializeStatus = 0;
 int initializationTime = 5;
 
 int redOutputMainRoad = 11;
@@ -55,6 +57,7 @@ void setup() {
   
   timeCompare = initializationTime;
   initializeStatus = true;
+  trafficLightStatus = 0;
   
   //set pins as outputs
   pinMode(redOutputMainRoad, OUTPUT);
@@ -88,17 +91,10 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
   
   count += 1;
 
-  if (initializeStatus) {
-    mainRoadYellowToggle = !mainRoadYellowToggle;
-    secondRoadYellowToggle = !secondRoadYellowToggle;
-    Serial.print("Yellow toggled");
+  if (trafficLightStatus == 0) {
     if (count >= timeCompare) {
         count = 0;
-        initializeStatus = false;
-      	mainRoadYellowToggle = false;
-      	secondRoadYellowToggle = false;
-        mainRoadRedToggle = true;
-        secondRoadRedToggle = true;
+        trafficLightStatus = 5;
         timeCompare = bothRoadTimeClose;
     } else {
       return;
@@ -107,45 +103,37 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
 
   if (count >= timeCompare) {
     count = 0;
-    if (mainRoadRedToggle && secondRoadRedToggle) {
-      if (mainRoadWillOpen) {
-        mainRoadWillOpen = false;
-        mainRoadGreenToggle = true;
-        mainRoadRedToggle = false;
-        timeCompare = mainRoadTimeOpen;
-        return;
-      } else {
-        mainRoadWillOpen = true;
-        secondRoadGreenToggle = true;
-        secondRoadRedToggle = false;
-        timeCompare = mainRoadTimeClose;
-        return;
-      }
+    if (trafficLightStatus == 5) {
+      trafficLightStatus = 1;
+      timeCompare = mainRoadTimeOpen;
+      return;
     }
 
-    if (mainRoadGreenToggle) {
-      mainRoadYellowToggle = true;
-      mainRoadGreenToggle = false;
+    if (trafficLightStatus == 6) {
+      trafficLightStatus = 2;
+      timeCompare = mainRoadTimeClose;
+      return;
+    }
+
+    if (trafficLightStatus == 1) {
+      trafficLightStatus = 3;
       timeCompare = mainRoadTimeTransition;
       return;
     }
 
-    if (mainRoadYellowToggle) {
-      mainRoadRedToggle = true;
-      mainRoadYellowToggle = false;
-      timeCompare = bothRoadTimeClose;
+    if (trafficLightStatus == 2) {
+      trafficLightStatus = 4;
+      timeCompare = mainRoadTimeTransition;
     } 
    
-    if (secondRoadGreenToggle) {
-      secondRoadGreenToggle = false;
-      secondRoadYellowToggle = true;
-      timeCompare = mainRoadTimeTransition;
+    if (trafficLightStatus == 3) {
+      trafficLightStatus = 6;
+      timeCompare = bothRoadTimeClose;
       return;
     }
 
-    if (secondRoadYellowToggle) {
-      secondRoadRedToggle = true;
-      secondRoadYellowToggle = false;
+    if (trafficLightStatus == 4) {
+      trafficLightStatus = 5;
       timeCompare = bothRoadTimeClose;
       return;
     }
