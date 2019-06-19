@@ -105,6 +105,20 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
   
   count += 1;
 
+  if (trafficLightStatus == 1 || trafficLightStatus == 3) {
+      if (count >= (mainRoadTimeOpen + mainRoadTimeTransition - 6)) {
+        pedestrianLightStatus = 4;
+        blinkOutput = !blinkOutput;
+      }
+  }
+
+  if (trafficLightStatus == 2 || trafficLightStatus == 4) {
+      if (count >= (mainRoadTimeClose + mainRoadTimeTransition - 6)) {
+        pedestrianLightStatus = 4;
+        blinkOutput = !blinkOutput;
+      }
+  }
+
   if (trafficLightStatus == 0) {
     if (count >= timeCompare) {
         count = 0;
@@ -223,10 +237,21 @@ void loop() {
     digitalWrite(greenPedestrianSecondRoad, LOW);
   }
 
+  if (pedestrianLightStatus == 2) {
+    digitalWrite(redPedestrianMainRoad, blinkOutput ? HIGH : LOW);
+    digitalWrite(greenPedestrianMainRoad, LOW);
+  }
+
   if (pedestrianLightStatus == 3) {
     digitalWrite(redPedestrianMainRoad, HIGH);
     digitalWrite(greenPedestrianMainRoad, LOW);
     digitalWrite(redPedestrianSecondRoad, LOW);
     digitalWrite(greenPedestrianSecondRoad, HIGH);
   }
+
+  if (pedestrianLightStatus == 4) {
+    digitalWrite(redPedestrianSecondRoad, blinkOutput ? HIGH : LOW);
+    digitalWrite(greenPedestrianSecondRoad, LOW);
+  }
+
 }
