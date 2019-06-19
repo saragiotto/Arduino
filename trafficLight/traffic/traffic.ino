@@ -19,30 +19,21 @@
 //
 //
 //storage variables
-boolean mainRoadGreenToggle = 0;
-boolean secondRoadGreenToggle = 0;
-boolean mainRoadYellowToggle = 0;
-boolean secondRoadYellowToggle = 0;
-boolean mainRoadRedToggle = 0;
-boolean secondRoadRedToggle = 0;
-boolean mainRoadWillOpen = 0;
-boolean initializeStatus = 0;
+boolean blinkOutput = 0;
 
 int trafficLightStatus = 0;
-
 int count = 0;
 int timeCompare = 5;
+int initializationTime = 5;
+
 int mainRoadTimeOpen = 12;
-int mainRoadTimeTransition = 1;
+int mainRoadTimeTransition = 2;
 int mainRoadTimeClose = 4;
 int bothRoadTimeClose = 1;
-
-int initializationTime = 5;
 
 int redOutputMainRoad = 11;
 int yellowOutputMainRoad = 12;
 int greenOutputMainRoad = 13;
-
 int redOutputSecondRoad = 8;
 int yellowOutputSecondRoad = 9;
 int greenOutputSecondRoad = 10;
@@ -56,7 +47,6 @@ void setup() {
   }
   
   timeCompare = initializationTime;
-  initializeStatus = true;
   trafficLightStatus = 0;
   
   //set pins as outputs
@@ -97,6 +87,7 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
         trafficLightStatus = 5;
         timeCompare = bothRoadTimeClose;
     } else {
+      blinkOutput = !blinkOutput;
       return;
   	}
   }
@@ -124,6 +115,7 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
     if (trafficLightStatus == 2) {
       trafficLightStatus = 4;
       timeCompare = mainRoadTimeTransition;
+      return;
     } 
    
     if (trafficLightStatus == 3) {
@@ -142,50 +134,59 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
   
 void loop() { 
 
-  if (initializeStatus) {
-    if (mainRoadYellowToggle) {
-      digitalWrite(yellowOutputMainRoad, HIGH);
-      digitalWrite(yellowOutputSecondRoad, HIGH);
-    } else {
-      digitalWrite(yellowOutputMainRoad, LOW);
-      digitalWrite(yellowOutputSecondRoad, LOW);
-    }
+  if (trafficLightStatus == 0) {
+    digitalWrite(yellowOutputMainRoad, blinkOutput ? HIGH : LOW);
+    digitalWrite(yellowOutputSecondRoad, blinkOutput ? HIGH : LOW);
     return;
   }
 
-  if (mainRoadRedToggle) {
-	digitalWrite(redOutputMainRoad, HIGH);
+  if (trafficLightStatus == 1) {
+  	digitalWrite(redOutputMainRoad, LOW);
     digitalWrite(yellowOutputMainRoad, LOW);
-    digitalWrite(greenOutputMainRoad, LOW);
-  }
-
-  if (secondRoadRedToggle) {
+    digitalWrite(greenOutputMainRoad, HIGH);
+    
     digitalWrite(redOutputSecondRoad, HIGH);
     digitalWrite(yellowOutputSecondRoad, LOW);
     digitalWrite(greenOutputSecondRoad, LOW);
   }
-  
-  if (mainRoadYellowToggle) {
-	digitalWrite(redOutputMainRoad, LOW);
-    digitalWrite(yellowOutputMainRoad, HIGH);
+
+  if (trafficLightStatus == 2) {
+    digitalWrite(redOutputMainRoad, HIGH);
+    digitalWrite(yellowOutputMainRoad, LOW);
     digitalWrite(greenOutputMainRoad, LOW);
+    
+    digitalWrite(redOutputSecondRoad, LOW);
+    digitalWrite(yellowOutputSecondRoad, LOW);
+    digitalWrite(greenOutputSecondRoad, HIGH);
   }
 
-  if (secondRoadYellowToggle) {
+  if (trafficLightStatus == 3) {
+    digitalWrite(redOutputMainRoad, LOW);
+    digitalWrite(yellowOutputMainRoad, HIGH);
+    digitalWrite(greenOutputMainRoad, LOW);
+    
+    digitalWrite(redOutputSecondRoad, HIGH);
+    digitalWrite(yellowOutputSecondRoad, LOW);
+    digitalWrite(greenOutputSecondRoad, LOW);
+  }
+
+  if (trafficLightStatus == 4) {
+    digitalWrite(redOutputMainRoad, HIGH);
+    digitalWrite(yellowOutputMainRoad, LOW);
+    digitalWrite(greenOutputMainRoad, LOW);
+    
     digitalWrite(redOutputSecondRoad, LOW);
     digitalWrite(yellowOutputSecondRoad, HIGH);
     digitalWrite(greenOutputSecondRoad, LOW);
   }
 
-  if (mainRoadGreenToggle) {
-	digitalWrite(redOutputMainRoad, LOW);
+  if (trafficLightStatus == 5 || trafficLightStatus == 6) {
+    digitalWrite(redOutputMainRoad, HIGH);
     digitalWrite(yellowOutputMainRoad, LOW);
-    digitalWrite(greenOutputMainRoad, HIGH);
-  }
-
-  if (secondRoadGreenToggle) {
-    digitalWrite(redOutputSecondRoad, LOW);
+    digitalWrite(greenOutputMainRoad, LOW);
+    
+    digitalWrite(redOutputSecondRoad, HIGH);
     digitalWrite(yellowOutputSecondRoad, LOW);
-    digitalWrite(greenOutputSecondRoad, HIGH);
+    digitalWrite(greenOutputSecondRoad, LOW);
   }
 }
