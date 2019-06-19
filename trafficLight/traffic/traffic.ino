@@ -1,42 +1,61 @@
 // Traffic light contro
 //
 //
-//  Attribute that control all state of the system
+//  Attribute that control all traffic light state
 //
-// +--------+---------------------------------------+
-// + State  + Status                                + 
-// +--------+---------------------------------------+
-// +  00    + Initialize Status                     + 
-// +  01    + Main Road Traffic Open                + 
-// +  02    + Second Road Traffic Open              + 
-// +  03    + Main Road Traffic Attention           + 
-// +  04    + Second Road Traffic Attention         + 
-// +  05    + Traffic Closed - Main Road Will Open  + 
+// +--------+-----------------------------------------+
+// + State  + Status                                  + 
+// +--------+-----------------------------------------+
+// +  00    + Initialize Status                       + 
+// +  01    + Main Road Traffic Open                  + 
+// +  02    + Second Road Traffic Open                + 
+// +  03    + Main Road Traffic Attention             + 
+// +  04    + Second Road Traffic Attention           + 
+// +  05    + Traffic Closed - Main Road Will Open    + 
 // +  06    + Traffic Closed - Second Road Will Open  + 
-// +  07    + Traffic Attention Both Roads          + 
-// +        +                                       +
-// +--------+---------------------------------------+
+// +  07    + Traffic Attention Both Roads            + 
+// +        +                                         +
+// +--------+-----------------------------------------+
+//
+//  Attribute that control all pedestrian light state
+//
+// +--------+-----------------------------------------+
+// + State  + Status                                  + 
+// +--------+-----------------------------------------+
+// +  00    + Initialize Status                       + 
+// +  01    + Main Road Pedestrian Open               + 
+// +  02    + Main Road Pedestrian Blinking           + 
+// +  03    + Second Road Pedestrian Open             + 
+// +  04    + Second Road Pedestrian Blinking         + 
+// +--------+-----------------------------------------+ 
+//
 //
 //
 //storage variables
 boolean blinkOutput = 0;
 
 int trafficLightStatus = 0;
+int pedestrianLightStatus = 0;
 int count = 0;
 int timeCompare = 5;
 int initializationTime = 5;
 
 int mainRoadTimeOpen = 12;
 int mainRoadTimeTransition = 2;
-int mainRoadTimeClose = 4;
+int mainRoadTimeClose = 8;
 int bothRoadTimeClose = 1;
 
-int redOutputMainRoad = 11;
-int yellowOutputMainRoad = 12;
-int greenOutputMainRoad = 13;
+int redPedestrianMainRoad = 4;
+int greenPedestrianMainRoad = 5;
+int redPedestrianSecondRoad = 6;
+int greenPedestrianSecondRoad = 7;
+
 int redOutputSecondRoad = 8;
 int yellowOutputSecondRoad = 9;
 int greenOutputSecondRoad = 10;
+int redOutputMainRoad = 11;
+int yellowOutputMainRoad = 12;
+int greenOutputMainRoad = 13;
 
 void setup() {
   
@@ -56,6 +75,11 @@ void setup() {
   pinMode(redOutputSecondRoad, OUTPUT);
   pinMode(yellowOutputSecondRoad, OUTPUT);
   pinMode(greenOutputSecondRoad, OUTPUT);
+
+  pinMode(redPedestrianMainRoad, OUTPUT);
+  pinMode(greenPedestrianMainRoad, OUTPUT);
+  pinMode(redPedestrianSecondRoad, OUTPUT);
+  pinMode(greenPedestrianSecondRoad, OUTPUT);
 
   cli();//stop interrupts
 
@@ -96,12 +120,14 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
     count = 0;
     if (trafficLightStatus == 5) {
       trafficLightStatus = 1;
+      pedestrianLightStatus = 3;
       timeCompare = mainRoadTimeOpen;
       return;
     }
 
     if (trafficLightStatus == 6) {
       trafficLightStatus = 2;
+      pedestrianLightStatus = 1;
       timeCompare = mainRoadTimeClose;
       return;
     }
@@ -188,5 +214,19 @@ void loop() {
     digitalWrite(redOutputSecondRoad, HIGH);
     digitalWrite(yellowOutputSecondRoad, LOW);
     digitalWrite(greenOutputSecondRoad, LOW);
+  }
+
+  if (pedestrianLightStatus == 1) {
+    digitalWrite(redPedestrianMainRoad, LOW);
+    digitalWrite(greenPedestrianMainRoad, HIGH);
+    digitalWrite(redPedestrianSecondRoad, HIGH);
+    digitalWrite(greenPedestrianSecondRoad, LOW);
+  }
+
+  if (pedestrianLightStatus == 3) {
+    digitalWrite(redPedestrianMainRoad, HIGH);
+    digitalWrite(greenPedestrianMainRoad, LOW);
+    digitalWrite(redPedestrianSecondRoad, LOW);
+    digitalWrite(greenPedestrianSecondRoad, HIGH);
   }
 }
