@@ -1,25 +1,26 @@
 #include <SoftwareSerial.h>
+#include <ESP8266WiFi.h>
+#include <Ticker.h>
 
-//RX pino 2, TX pino 3
-SoftwareSerial esp8266(0, 1);
- 
-#define DEBUG true
+Ticker blinker;
+
+#define LED 2  //On board LED
+
+void ICACHE_RAM_ATTR onTimerISR(){
+    digitalWrite(LED,!(digitalRead(LED)));  //Toggle LED Pin
+    timer1_write(600000);//12us
+}
 
 void setup() {
-  
-  Serial.begin(9600);
-  // Configure na linha abaixo a velocidade inicial do
-  // modulo ESP8266
-  esp8266.begin(16000);
-  sendData("AT+RSTrn", 2000, DEBUG);
-  delay(1000);
-  Serial.println("Versao de firmware");
-  delay(3000);
-  sendData("AT+GMRrn", 2000, DEBUG); // rst
-  // Configure na linha abaixo a velocidade desejada para a
-  // comunicacao do modulo ESP8266 (9600, 19200, 38400, etc)
-  sendData("AT+CIOBAUD=16000rn", 2000, DEBUG);
-  Serial.println("** Final **");
+    Serial.begin(115200);
+    Serial.println("");
+
+    pinMode(LED,OUTPUT);
+
+    //Initialize Ticker every 0.5s
+    timer1_attachInterrupt(onTimerISR);
+    timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);
+    timer1_write(600000); //120000 us
 }
 
   
